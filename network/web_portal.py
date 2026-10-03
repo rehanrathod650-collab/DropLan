@@ -509,7 +509,7 @@ class WebPortalSignals(QObject):
 
 class WebPortalServer(QThread):
     """
-    QThread running the lightweight ThreadingHTTPServer for Phone Web Portal sharing.
+    QThread running the lightweight HTTPServer for Phone Web Portal sharing.
     """
 
     def __init__(
@@ -527,7 +527,7 @@ class WebPortalServer(QThread):
         self.signals = WebPortalSignals()
 
         self.shared_files: Dict[str, Dict[str, Any]] = {}
-        self._httpd: Optional[ThreadingHTTPServer] = None
+        self._httpd: Optional[HTTPServer] = None
         self._running = False
         self.lan_ip = get_local_lan_ip()
         self.bound_port = 0
