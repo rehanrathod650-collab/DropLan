@@ -83,6 +83,8 @@ def main() -> int:
             window.discovery_worker.stop()
         if hasattr(window, "receiver_server") and window.receiver_server:
             window.receiver_server.stop()
+        if hasattr(window, "web_portal") and window.web_portal:
+            window.web_portal.stop()
         if window.active_sender and window.active_sender.isRunning():
             window.active_sender.cancel()
             window.active_sender.wait(1000)

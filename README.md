@@ -58,6 +58,23 @@ For students, lab computers, or anyone who doesn't want to install Python:
 
 ---
 
+## 📱 Sharing Files with a Smartphone (Android & iOS)
+
+DropLAN includes a built-in **Mobile Web Portal** that allows you to send and receive files with any smartphone on your local Wi-Fi — **no mobile app or installation required!**
+
+1. In DropLAN on your PC, click the **📱 Phone Share** button in the top header bar.
+2. A window will display a **QR code** and local network link (e.g. `http://192.168.1.100:8080`).
+3. Connect your Android or iPhone to the **same Wi-Fi network**.
+4. Open your phone's Camera app and **scan the QR code** (or open the link in Chrome/Safari).
+5. **Send Files from Phone to PC:**
+   * Tap *"Tap to select photos, videos, or files"* on your mobile screen.
+   * Tap **Upload to PC 🚀**. The files stream directly to your PC's `~/Downloads/DropLAN_Received` folder at full Wi-Fi speed!
+6. **Download Files from PC to Phone:**
+   * In DropLAN on your PC, click *"+ Add File..."* to share files with your phone.
+   * They will immediately appear on your phone's browser with a one-tap **Download ⬇️** button!
+
+---
+
 ## 🚀 Key Features
 
 * **100% Offline & Private:** Operates strictly on your local network. No internet connection, cloud servers, or third-party accounts are used.

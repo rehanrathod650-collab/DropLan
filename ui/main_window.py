@@ -34,7 +34,9 @@ from PyQt6.QtWidgets import (
 
 from network.discovery import PeerDiscoveryWorker
 from network.transfer import FileReceiverServer, FileSenderWorker
+from network.web_portal import WebPortalServer
 from security import DEFAULT_DOWNLOAD_DIR
+from ui.phone_dialog import MobileShareDialog
 from ui.security_dialog import SecurityConfirmDialog, format_bytes
 from ui.styles import DARK_THEME_QSS
 
@@ -235,6 +237,15 @@ class MainWindow(QMainWindow):
         self.node_info_label.setObjectName("NodePill")
         layout.addWidget(self.node_info_label)
 
+        # Phone Share Button (QR Code Portal)
+        self.btn_phone_share = QPushButton("📱 Phone Share")
+        self.btn_phone_share.setStyleSheet(
+            "background: #1e293b; color: #00d2ff; border: 1px solid #00d2ff66; border-radius: 8px; font-weight: 700;"
+        )
+        self.btn_phone_share.setToolTip("Share files with Android or iPhone via QR Code")
+        self.btn_phone_share.clicked.connect(self._open_mobile_portal)
+        layout.addWidget(self.btn_phone_share)
+
         # Open Downloads Button
         open_downloads_btn = QPushButton("📁 Downloads")
         open_downloads_btn.setToolTip("Open received files directory")
@@ -422,6 +433,16 @@ class MainWindow(QMainWindow):
         self.receiver_server.signals.status_message.connect(lambda m: self._log("SERVER", m))
 
         self.receiver_server.start()
+
+        # 2. Start Mobile Web Portal for Smartphone Transfer
+        self.web_portal = WebPortalServer(
+            node_name=self.node_name,
+            download_dir=self.download_dir,
+        )
+        self.web_portal.signals.file_uploaded_from_phone.connect(self._on_phone_file_uploaded)
+        self.web_portal.signals.file_downloaded_by_phone.connect(self._on_phone_file_downloaded)
+        self.web_portal.signals.log_message.connect(lambda m: self._log("MOBILE", m))
+        self.web_portal.start()
 
     @pyqtSlot(int)
     def _on_server_ready(self, bound_port: int) -> None:
@@ -718,6 +739,23 @@ class MainWindow(QMainWindow):
         formatted = f"<span style='color: #64748b;'>[{timestamp}]</span> <b style='color: {color};'>[{tag}]</b> {message}"
         self.activity_log.append(formatted)
 
+    def _open_mobile_portal(self) -> None:
+        """Open the Mobile Phone Share dialog with QR code and active link."""
+        if hasattr(self, "web_portal") and self.web_portal:
+            if self.selected_file_path:
+                self.web_portal.add_shared_file(self.selected_file_path)
+            dialog = MobileShareDialog(self.web_portal, parent=self)
+            dialog.exec()
+
+    @pyqtSlot(str, str, int)
+    def _on_phone_file_uploaded(self, client_ip: str, filename: str, filesize: int) -> None:
+        self._log("MOBILE", f"Received file from phone ({client_ip}): '{filename}' ({format_bytes(filesize)})")
+        self._set_transfer_state("Received", "#00e676")
+
+    @pyqtSlot(str, str)
+    def _on_phone_file_downloaded(self, client_ip: str, filename: str) -> None:
+        self._log("MOBILE", f"Phone ({client_ip}) downloaded: '{filename}'")
+
     def closeEvent(self, event) -> None:
         """Application shutdown lifecycle hook."""
         self._log("SYSTEM", "Shutting down DropLAN services...")
@@ -725,6 +763,8 @@ class MainWindow(QMainWindow):
             self.discovery_worker.stop()
         if hasattr(self, "receiver_server") and self.receiver_server:
             self.receiver_server.stop()
+        if hasattr(self, "web_portal") and self.web_portal:
+            self.web_portal.stop()
         if self.active_sender and self.active_sender.isRunning():
             self.active_sender.cancel()
             self.active_sender.wait(1000)
