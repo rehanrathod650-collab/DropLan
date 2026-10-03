@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller build outputs
+build/
+dist/
+*.manifest
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local data & quarantine downloads
+DropLAN_Received/
+*.part
+*.tmp
+
+# Environment & IDE
+.vscode/
+.idea/
+venv/
+env/
+.env
